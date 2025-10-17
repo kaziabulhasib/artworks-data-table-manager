@@ -4,9 +4,17 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { useEffect, useState } from "react";
 
 const Table = () => {
-  const url = "https://api.artic.edu/api/v1/artworks?page=1";
+  // const url = "https://api.artic.edu/api/v1/artworks?page=1";
+
+  const onPageChange = (event) => {
+    setPage(event.page + 1);
+  };
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [page, setPage] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
 
   const columns = [
     { field: "title", header: "Title" },
@@ -17,22 +25,27 @@ const Table = () => {
     { field: "date_end", header: "Date End" },
   ];
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        setProducts(data.data || []);
-        console.log("Fetched data:", data.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchData = async (pageNumber = 1) => {
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `https://api.artic.edu/api/v1/artworks?page=${pageNumber}`
+      );
+      const data = await res.json();
 
-    fetchData();
-  }, []);
+      setProducts(data.data || []);
+      setTotalRecords(data.pagination.total);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData(page);
+  }, [page]);
+
   return (
     <div className='card'>
       <h1 className='text-center'>Data table</h1>
@@ -43,13 +56,18 @@ const Table = () => {
         </div>
       ) : (
         <DataTable
+          value={products}
           stripedRows
           paginator
-          rows={3}
-          value={products}
+          rows={12}
+          totalRecords={totalRecords}
+          lazy
+          first={(page - 1) * 12}
+          onPage={onPageChange}
+          loading={loading}
           tableStyle={{ minWidth: "50rem" }}>
           {columns.map((col) => (
-            <Column key={col.field} field={col.field} header={col.header} />
+            <Column key={col.id} field={col.field} header={col.header} />
           ))}
         </DataTable>
       )}
