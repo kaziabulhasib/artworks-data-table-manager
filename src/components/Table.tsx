@@ -92,6 +92,7 @@ const Table = () => {
             onPage={onPageChange}
             loading={loading}
             tableStyle={{ minWidth: "55rem" }}>
+            <Column selectionMode='multiple' headerStyle={{ width: "3rem" }} />
             {columns.map((col) => (
               <Column key={col.field} field={col.field} header={col.header} />
             ))}
