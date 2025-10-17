@@ -5,7 +5,7 @@ import {
   type DataTableSelectionMultipleChangeEvent,
 } from "primereact/datatable";
 import { ProgressSpinner } from "primereact/progressspinner";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import OverlayPanelButton from "./OverlayPanelButton";
 
 interface Artwork {
@@ -65,39 +65,70 @@ const Table = () => {
     fetchData(page);
   }, [page]);
 
+  //
+
+  const pendingSelectionRef = useRef<typeof pendingSelection>(pendingSelection);
+
   useEffect(() => {
-    if (pendingSelection && products.length > 0 && !loading) {
-      const alreadySelected = pendingSelection.currentlySelected.length;
-      const stillNeeded = pendingSelection.totalNeeded - alreadySelected;
+    pendingSelectionRef.current = pendingSelection;
+  }, [pendingSelection]);
 
-      if (stillNeeded > 0) {
-        const rowsToSelectFromCurrentPage = Math.min(
-          stillNeeded,
-          products.length
-        );
-        const newSelections = products.slice(0, rowsToSelectFromCurrentPage);
-        const updatedSelected = [
-          ...pendingSelection.currentlySelected,
-          ...newSelections,
-        ];
-        setSelectedProducts(updatedSelected);
-        const newStillNeeded =
-          pendingSelection.totalNeeded - updatedSelected.length;
+  useEffect(() => {
+    const ps = pendingSelectionRef.current;
 
-        if (newStillNeeded > 0) {
-          setPendingSelection({
-            totalNeeded: pendingSelection.totalNeeded,
-            currentlySelected: updatedSelected,
-            startPage: pendingSelection.startPage,
-          });
+    if (!ps || products.length === 0 || loading) return;
 
-          setTimeout(() => {
-            setPage((prev) => prev + 1);
-          }, 50);
-        } else {
-          setPendingSelection(null);
-        }
+    const alreadySelected = ps.currentlySelected.length;
+    const stillNeeded = ps.totalNeeded - alreadySelected;
+
+    if (stillNeeded <= 0) {
+      setPendingSelection(null);
+      return;
+    }
+
+    const rowsToSelectFromCurrentPage = Math.min(stillNeeded, products.length);
+    const newSelections = products.slice(0, rowsToSelectFromCurrentPage);
+
+    const uniqueSelections = [
+      ...new Map(
+        [...ps.currentlySelected, ...newSelections].map((item) => [
+          item.id,
+          item,
+        ])
+      ).values(),
+    ];
+
+    const sameLength = uniqueSelections.length === ps.currentlySelected.length;
+    const sameIds =
+      sameLength &&
+      uniqueSelections.every(
+        (it, idx) => it.id === ps.currentlySelected[idx]?.id
+      );
+
+    if (!sameIds) {
+      setSelectedProducts(uniqueSelections);
+    }
+
+    if (uniqueSelections.length < ps.totalNeeded) {
+      const nextPending: NonNullable<typeof pendingSelection> = {
+        totalNeeded: ps.totalNeeded,
+        currentlySelected: uniqueSelections,
+        startPage: ps.startPage,
+      };
+
+      const changed =
+        JSON.stringify(nextPending.currentlySelected.map((s) => s.id)) !==
+        JSON.stringify(ps.currentlySelected.map((s) => s.id));
+
+      if (changed) {
+        setPendingSelection(nextPending);
       }
+
+      requestAnimationFrame(() => {
+        setPage((p) => p + 1);
+      });
+    } else {
+      setPendingSelection(null);
     }
   }, [products, loading]);
 
