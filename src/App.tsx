@@ -1,10 +1,13 @@
-import "./App.css";
+
 import { PrimeReactProvider } from "primereact/api";
-import { Button } from "primereact/button";
 
 import "primeicons/primeicons.css";
 
 import "primereact/resources/themes/lara-light-cyan/theme.css";
+import "primereact/resources/primereact.min.css";
+
+import "primeflex/primeflex.css";
+
 import Table from "./components/Table";
 // import "primereact/resources/themes/arya-blue/theme.css";
 
