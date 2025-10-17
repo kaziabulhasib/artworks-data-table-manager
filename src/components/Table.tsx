@@ -1,5 +1,6 @@
 import { Column } from "primereact/column";
 import { DataTable, type DataTablePageEvent } from "primereact/datatable";
+
 import { ProgressSpinner } from "primereact/progressspinner";
 import { useEffect, useState } from "react";
 
@@ -28,6 +29,7 @@ const Table = () => {
   };
 
   const [products, setProducts] = useState<Artwork[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<Artworks[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const [page, setPage] = useState<number>(1);
@@ -72,22 +74,29 @@ const Table = () => {
           <ProgressSpinner />
         </div>
       ) : (
-        <DataTable
-          value={products}
-          dataKey='id'
-          stripedRows
-          paginator
-          rows={12}
-          totalRecords={totalRecords}
-          lazy
-          first={(page - 1) * 12}
-          onPage={onPageChange}
-          loading={loading}
-          tableStyle={{ minWidth: "50rem" }}>
-          {columns.map((col) => (
-            <Column key={col.field} field={col.field} header={col.header} />
-          ))}
-        </DataTable>
+        <>
+          {/* check box  */}
+
+          <DataTable
+            value={products}
+            selectionMode='multiple'
+            selection={selectedProducts!}
+            onSelectionChange={(e) => setSelectedProducts(e.value)}
+            scrollable
+            stripedRows
+            paginator
+            rows={12}
+            totalRecords={totalRecords}
+            lazy
+            first={(page - 1) * 12}
+            onPage={onPageChange}
+            loading={loading}
+            tableStyle={{ minWidth: "55rem" }}>
+            {columns.map((col) => (
+              <Column key={col.field} field={col.field} header={col.header} />
+            ))}
+          </DataTable>
+        </>
       )}
     </div>
   );
