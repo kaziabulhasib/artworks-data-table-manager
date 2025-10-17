@@ -1,7 +1,7 @@
-import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { useEffect, useState } from "react";
+import { DataTable } from "primereact/datatable";
 import { ProgressSpinner } from "primereact/progressspinner";
+import { useEffect, useState } from "react";
 
 const Table = () => {
   const url = "https://api.artic.edu/api/v1/artworks?page=1";
@@ -42,7 +42,12 @@ const Table = () => {
           <ProgressSpinner />
         </div>
       ) : (
-        <DataTable value={products} tableStyle={{ minWidth: "50rem" }}>
+        <DataTable
+          stripedRows
+          paginator
+          rows={3}
+          value={products}
+          tableStyle={{ minWidth: "50rem" }}>
           {columns.map((col) => (
             <Column key={col.field} field={col.field} header={col.header} />
           ))}
