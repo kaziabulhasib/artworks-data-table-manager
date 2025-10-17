@@ -1,0 +1,11 @@
+.selection-header {
+  position: relative;
+}
+
+.selection-header .overlay-btn-container {
+  position: absolute;
+  left: 32px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}

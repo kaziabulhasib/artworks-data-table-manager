@@ -20,11 +20,16 @@ const OverlayPanelButton = ({ onSubmit }: OverlayPanelButtonProps) => {
   };
 
   return (
-    <div>
+    <>
       <Button
         type='button'
         icon='pi pi-chevron-down'
         onClick={(e) => op.current.toggle(e)}
+        text
+        plain
+        severity='contrast'
+       
+        style={{ color: "#71797E" }}
       />
 
       <OverlayPanel ref={op}>
@@ -38,7 +43,7 @@ const OverlayPanelButton = ({ onSubmit }: OverlayPanelButtonProps) => {
           <Button label='Submit' outlined onClick={handleSubmit} />
         </div>
       </OverlayPanel>
-    </div>
+    </>
   );
 };
 

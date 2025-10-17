@@ -34,7 +34,7 @@ const Table = () => {
   const [totalRecords, setTotalRecords] = useState<number>(0);
   const [metaKey, setMetaKey] = useState<boolean>(true);
 
-//  bulk selection 
+  //  bulk selection
   const [pendingSelection, setPendingSelection] = useState<{
     totalNeeded: number;
     currentlySelected: Artwork[];
@@ -76,14 +76,13 @@ const Table = () => {
     fetchData(page);
   }, [page]);
 
-  //  persisted selectons 
+  //  persisted selectons
   useEffect(() => {
     if (products.length === 0) return;
     const selectedOnPage = products.filter((p) => allSelections[p.id]);
     setSelectedProducts(selectedOnPage);
   }, [products, allSelections]);
 
-  
   useEffect(() => {
     const ps = pendingSelectionRef.current;
     if (!ps || products.length === 0 || loading) return;
@@ -186,8 +185,8 @@ const Table = () => {
           <ProgressSpinner />
         </div>
       ) : (
-        <>
-          <OverlayPanelButton onSubmit={handleRowSelection} />
+        <div className=''>
+          {/* <OverlayPanelButton onSubmit={handleRowSelection} /> */}
 
           <DataTable
             value={products}
@@ -207,12 +206,23 @@ const Table = () => {
             onPage={onPageChange}
             loading={loading}
             tableStyle={{ minWidth: "55rem" }}>
-            <Column selectionMode='multiple' headerStyle={{ width: "3rem" }} />
+            <Column
+              selectionMode='multiple'
+              headerStyle={{ width: "3rem",  }}
+              headerClassName='selection-header' 
+              header={
+                <div style={{ width: "100%", height: "100%" }}>
+                  <div className='overlay-btn-container'>
+                    <OverlayPanelButton onSubmit={handleRowSelection} />
+                  </div>
+                </div>
+              }
+            />
             {columns.map((col) => (
               <Column key={col.field} field={col.field} header={col.header} />
             ))}
           </DataTable>
-        </>
+        </div>
       )}
     </div>
   );
