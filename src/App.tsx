@@ -11,7 +11,6 @@ import Table from "./components/Table";
 function App() {
   return (
     <PrimeReactProvider>
-      <Button label='Check' icon='pi pi-check' />
       <Table />
     </PrimeReactProvider>
   );
