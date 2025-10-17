@@ -1,22 +1,39 @@
 import { Column } from "primereact/column";
-import { DataTable } from "primereact/datatable";
+import { DataTable, type DataTablePageEvent } from "primereact/datatable";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { useEffect, useState } from "react";
+
+interface Artwork {
+  id: number;
+  title: string;
+  place_of_origin: string;
+  artist_display: string;
+  inscriptions: string;
+  date_start: number;
+  date_end: number;
+}
+
+interface ColumnType {
+  field: keyof Artwork;
+  header: string;
+}
 
 const Table = () => {
   // const url = "https://api.artic.edu/api/v1/artworks?page=1";
 
-  const onPageChange = (event) => {
-    setPage(event.page + 1);
+  const onPageChange = (event: DataTablePageEvent) => {
+    if (event.page !== undefined) {
+      setPage(event.page + 1);
+    }
   };
 
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<Artwork[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const [page, setPage] = useState(1);
-  const [totalRecords, setTotalRecords] = useState(0);
+  const [page, setPage] = useState<number>(1);
+  const [totalRecords, setTotalRecords] = useState<number>(0);
 
-  const columns = [
+  const columns: ColumnType[] = [
     { field: "title", header: "Title" },
     { field: "place_of_origin", header: "Place of Origin" },
     { field: "artist_display", header: "Artist Display" },
@@ -57,6 +74,7 @@ const Table = () => {
       ) : (
         <DataTable
           value={products}
+          dataKey='id'
           stripedRows
           paginator
           rows={12}
@@ -67,7 +85,7 @@ const Table = () => {
           loading={loading}
           tableStyle={{ minWidth: "50rem" }}>
           {columns.map((col) => (
-            <Column key={col.id} field={col.field} header={col.header} />
+            <Column key={col.field} field={col.field} header={col.header} />
           ))}
         </DataTable>
       )}
