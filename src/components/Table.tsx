@@ -1,5 +1,9 @@
 import { Column } from "primereact/column";
-import { DataTable, type DataTablePageEvent } from "primereact/datatable";
+import {
+  DataTable,
+  type DataTablePageEvent,
+  type DataTableSelectionMultipleChangeEvent,
+} from "primereact/datatable";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { useEffect, useState } from "react";
 import OverlayPanelButton from "./OverlayPanelButton";
@@ -124,13 +128,13 @@ const Table = () => {
     }
   };
 
-  const handleSelectionChange = (e: any) => {
+  const handleSelectionChange = (
+    e: DataTableSelectionMultipleChangeEvent<Artwork[]>
+  ) => {
     if (!pendingSelection) {
       setSelectedProducts(e.value);
     }
   };
-
-  const dataKey = "id";
 
   return (
     <div className='card'>
@@ -146,7 +150,7 @@ const Table = () => {
 
           <DataTable
             value={products}
-            dataKey={dataKey}
+            dataKey='id'
             selectionMode='multiple'
             metaKeySelection={metaKey}
             selection={selectedProducts}
