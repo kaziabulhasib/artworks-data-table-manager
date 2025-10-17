@@ -20,15 +20,17 @@ interface ColumnType {
 }
 
 const Table = () => {
-  // const url = "https://api.artic.edu/api/v1/artworks?page=1";
-
   const [products, setProducts] = useState<Artwork[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-
   const [page, setPage] = useState<number>(1);
   const [totalRecords, setTotalRecords] = useState<number>(0);
   const [metaKey, setMetaKey] = useState<boolean>(true);
+  const [pendingSelection, setPendingSelection] = useState<{
+    totalNeeded: number;
+    currentlySelected: Artwork[];
+    startPage: number;
+  } | null>(null);
 
   const columns: ColumnType[] = [
     { field: "title", header: "Title" },
@@ -46,7 +48,6 @@ const Table = () => {
         `https://api.artic.edu/api/v1/artworks?page=${pageNumber}`
       );
       const data = await res.json();
-
       setProducts(data.data || []);
       setTotalRecords(data.pagination.total);
     } catch (error) {
@@ -60,23 +61,83 @@ const Table = () => {
     fetchData(page);
   }, [page]);
 
+  useEffect(() => {
+    if (pendingSelection && products.length > 0 && !loading) {
+      const alreadySelected = pendingSelection.currentlySelected.length;
+      const stillNeeded = pendingSelection.totalNeeded - alreadySelected;
+
+      if (stillNeeded > 0) {
+        const rowsToSelectFromCurrentPage = Math.min(
+          stillNeeded,
+          products.length
+        );
+        const newSelections = products.slice(0, rowsToSelectFromCurrentPage);
+        const updatedSelected = [
+          ...pendingSelection.currentlySelected,
+          ...newSelections,
+        ];
+        setSelectedProducts(updatedSelected);
+        const newStillNeeded =
+          pendingSelection.totalNeeded - updatedSelected.length;
+
+        if (newStillNeeded > 0) {
+          setPendingSelection({
+            totalNeeded: pendingSelection.totalNeeded,
+            currentlySelected: updatedSelected,
+            startPage: pendingSelection.startPage,
+          });
+
+          setTimeout(() => {
+            setPage((prev) => prev + 1);
+          }, 50);
+        } else {
+          setPendingSelection(null);
+        }
+      }
+    }
+  }, [products, loading]);
+
   const handleRowSelection = (numRows: number) => {
-    const rowsToSelect = products.slice(0, Math.min(numRows, products.length));
-    setSelectedProducts(rowsToSelect);
+    const rowsFromCurrentPage = Math.min(numRows, products.length);
+    const currentPageSelections = products.slice(0, rowsFromCurrentPage);
+    setSelectedProducts(currentPageSelections);
+
+    if (numRows > rowsFromCurrentPage) {
+      setPendingSelection({
+        totalNeeded: numRows,
+        currentlySelected: currentPageSelections,
+        startPage: page,
+      });
+
+      setTimeout(() => {
+        setPage((prev) => prev + 1);
+      }, 50);
+    } else {
+      setPendingSelection(null);
+    }
   };
 
   const onPageChange = (event: DataTablePageEvent) => {
-    if (event.page !== undefined) {
+    if (event.page !== undefined && !pendingSelection) {
       setPage(event.page + 1);
+      setSelectedProducts([]);
     }
   };
+
+  const handleSelectionChange = (e: any) => {
+    if (!pendingSelection) {
+      setSelectedProducts(e.value);
+    }
+  };
+
+  const dataKey = "id";
 
   return (
     <div className='card'>
       <h1 className='text-center'>Data table</h1>
 
       {loading ? (
-        <div className='card flex justify-content-center items-center  '>
+        <div className='card flex justify-content-center items-center'>
           <ProgressSpinner />
         </div>
       ) : (
@@ -85,11 +146,11 @@ const Table = () => {
 
           <DataTable
             value={products}
+            dataKey={dataKey}
             selectionMode='multiple'
             metaKeySelection={metaKey}
-            selection={selectedProducts!}
-            // onSelectionChange={(e) => setSelectedProducts(e.value)}
-            onSelectionChange={(e) => setSelectedProducts(e.value)}
+            selection={selectedProducts}
+            onSelectionChange={handleSelectionChange}
             dragSelection
             scrollable
             stripedRows
@@ -102,8 +163,6 @@ const Table = () => {
             loading={loading}
             tableStyle={{ minWidth: "55rem" }}>
             <Column selectionMode='multiple' headerStyle={{ width: "3rem" }} />
-            {/* overlay panel */}
-
             {columns.map((col) => (
               <Column key={col.field} field={col.field} header={col.header} />
             ))}
