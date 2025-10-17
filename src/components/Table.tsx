@@ -1,3 +1,4 @@
+import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable, type DataTablePageEvent } from "primereact/datatable";
 
@@ -93,6 +94,8 @@ const Table = () => {
             loading={loading}
             tableStyle={{ minWidth: "55rem" }}>
             <Column selectionMode='multiple' headerStyle={{ width: "3rem" }} />
+            {/* overlay panel */}
+
             {columns.map((col) => (
               <Column key={col.field} field={col.field} header={col.header} />
             ))}
