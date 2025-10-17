@@ -1,9 +1,8 @@
-import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable, type DataTablePageEvent } from "primereact/datatable";
-
 import { ProgressSpinner } from "primereact/progressspinner";
 import { useEffect, useState } from "react";
+import OverlayPanelButton from "./OverlayPanelButton";
 
 interface Artwork {
   id: number;
@@ -23,18 +22,13 @@ interface ColumnType {
 const Table = () => {
   // const url = "https://api.artic.edu/api/v1/artworks?page=1";
 
-  const onPageChange = (event: DataTablePageEvent) => {
-    if (event.page !== undefined) {
-      setPage(event.page + 1);
-    }
-  };
-
   const [products, setProducts] = useState<Artwork[]>([]);
-  const [selectedProducts, setSelectedProducts] = useState<Artworks[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const [page, setPage] = useState<number>(1);
   const [totalRecords, setTotalRecords] = useState<number>(0);
+  const [metaKey, setMetaKey] = useState<boolean>(true);
 
   const columns: ColumnType[] = [
     { field: "title", header: "Title" },
@@ -66,6 +60,17 @@ const Table = () => {
     fetchData(page);
   }, [page]);
 
+  const handleRowSelection = (numRows: number) => {
+    const rowsToSelect = products.slice(0, Math.min(numRows, products.length));
+    setSelectedProducts(rowsToSelect);
+  };
+
+  const onPageChange = (event: DataTablePageEvent) => {
+    if (event.page !== undefined) {
+      setPage(event.page + 1);
+    }
+  };
+
   return (
     <div className='card'>
       <h1 className='text-center'>Data table</h1>
@@ -76,13 +81,16 @@ const Table = () => {
         </div>
       ) : (
         <>
-          {/* check box  */}
+          <OverlayPanelButton onSubmit={handleRowSelection} />
 
           <DataTable
             value={products}
             selectionMode='multiple'
+            metaKeySelection={metaKey}
             selection={selectedProducts!}
+            // onSelectionChange={(e) => setSelectedProducts(e.value)}
             onSelectionChange={(e) => setSelectedProducts(e.value)}
+            dragSelection
             scrollable
             stripedRows
             paginator

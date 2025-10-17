@@ -1,10 +1,24 @@
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
-const OverlayPanelButton = () => {
+interface OverlayPanelButtonProps {
+  onSubmit: (value: number) => void;
+}
+
+const OverlayPanelButton = ({ onSubmit }: OverlayPanelButtonProps) => {
+  const [inputValue, setInputValue] = useState("");
   const op = useRef(null);
+
+  const handleSubmit = (e: React.MouseEvent) => {
+    const numValue = parseInt(inputValue);
+    if (!isNaN(numValue) && numValue > 0) {
+      onSubmit(numValue);
+    }
+    op.current.toggle(e);
+  };
+
   return (
     <div>
       <Button
@@ -15,8 +29,13 @@ const OverlayPanelButton = () => {
 
       <OverlayPanel ref={op}>
         <div className='flex flex-column gap-3 align-items-end'>
-          <InputText keyfilter='int' placeholder='Select Rows' />
-          <Button label='Submit' outlined   />
+          <InputText
+            keyfilter='int'
+            placeholder='Select Rows'
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+          />
+          <Button label='Submit' outlined onClick={handleSubmit} />
         </div>
       </OverlayPanel>
     </div>
