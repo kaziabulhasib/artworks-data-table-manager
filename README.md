@@ -4,7 +4,7 @@ A React application featuring a dynamic data table with advanced row selection c
 
 ## Live Link
 
-[Add your deployment link here]
+https://artworks-data-table-manager.netlify.app/
 
 ## Features
 
