@@ -26,8 +26,8 @@ https://artworks-data-table-manager.netlify.app/
 1. Clone the repository
 
 ```bash
-git clone [your-repo-url]
-cd [your-project-name]
+git clone https://github.com/kaziabulhasib/artworks-data-table-manager
+cd artworks-data-table-manager
 ```
 
 2. Install dependencies
