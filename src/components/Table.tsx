@@ -32,7 +32,7 @@ const Table = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
   const [totalRecords, setTotalRecords] = useState<number>(0);
-  const [metaKey, setMetaKey] = useState<boolean>(true);
+  // const [metaKey, setMetaKey] = useState<boolean>(true);
 
   //  bulk selection
   const [pendingSelection, setPendingSelection] = useState<{
@@ -192,7 +192,7 @@ const Table = () => {
             value={products}
             dataKey='id'
             selectionMode='multiple'
-            metaKeySelection={metaKey}
+            // metaKeySelection={metaKey}
             selection={selectedProducts}
             onSelectionChange={handleSelectionChange}
             dragSelection
