@@ -33,7 +33,6 @@ const Table = () => {
   const [page, setPage] = useState<number>(1);
   const [totalRecords, setTotalRecords] = useState<number>(0);
 
-  //  bulk selection
   const [pendingSelection, setPendingSelection] = useState<{
     totalNeeded: number;
     currentlySelected: Artwork[];
@@ -54,7 +53,6 @@ const Table = () => {
     { field: "date_end", header: "Date End" },
   ];
 
-  // Fetch paginated data
   const fetchData = async (pageNumber = 1) => {
     setLoading(true);
     try {
@@ -75,7 +73,6 @@ const Table = () => {
     fetchData(page);
   }, [page]);
 
-  //  persisted selectons
   useEffect(() => {
     if (products.length === 0) return;
     const selectedOnPage = products.filter((p) => allSelections[p.id]);
@@ -88,6 +85,7 @@ const Table = () => {
 
     const alreadySelected = ps.currentlySelected.length;
     const stillNeeded = ps.totalNeeded - alreadySelected;
+
     if (stillNeeded <= 0) {
       setPendingSelection(null);
       return;
@@ -95,6 +93,7 @@ const Table = () => {
 
     const rowsToSelectFromCurrentPage = Math.min(stillNeeded, products.length);
     const newSelections = products.slice(0, rowsToSelectFromCurrentPage);
+
     const uniqueSelections = [
       ...new Map(
         [...ps.currentlySelected, ...newSelections].map((item) => [
@@ -104,89 +103,101 @@ const Table = () => {
       ).values(),
     ];
 
-    const updatedMap = { ...allSelections };
-    uniqueSelections.forEach((item) => (updatedMap[item.id] = item));
-    setAllSelections(updatedMap);
+//  persisted selections
+    requestAnimationFrame(() => {
+      
+      setAllSelections((prev) => {
+        const updatedMap = { ...prev };
+        uniqueSelections.forEach((item) => (updatedMap[item.id] = item));
+        return updatedMap;
+      });
 
-    setSelectedProducts(products.filter((p) => updatedMap[p.id]));
+      
+      setSelectedProducts(
+        products.filter((p) =>
+          uniqueSelections.some((selected) => selected.id === p.id)
+        )
+      );
 
-    if (uniqueSelections.length < ps.totalNeeded) {
-      const nextPending = {
-        totalNeeded: ps.totalNeeded,
-        currentlySelected: uniqueSelections,
-        startPage: ps.startPage,
-      };
-      setPendingSelection(nextPending);
-      requestAnimationFrame(() => setPage((p) => p + 1));
-    } else {
-      setPendingSelection(null);
-    }
+      //  pagination 
+      if (uniqueSelections.length < ps.totalNeeded) {
+        setPendingSelection({
+          totalNeeded: ps.totalNeeded,
+          currentlySelected: uniqueSelections,
+          startPage: ps.startPage,
+        });
+        setPage((p) => p + 1);
+      } else {
+        setPendingSelection(null);
+      }
+    });
   }, [products, loading]);
 
-  // Manual multi-row selection
   const handleRowSelection = (numRows: number) => {
     const rowsFromCurrentPage = Math.min(numRows, products.length);
     const currentPageSelections = products.slice(0, rowsFromCurrentPage);
 
-    const updatedMap = { ...allSelections };
-    currentPageSelections.forEach((item) => (updatedMap[item.id] = item));
-    setAllSelections(updatedMap);
-    setSelectedProducts(currentPageSelections);
-
-    if (numRows > rowsFromCurrentPage) {
-      setPendingSelection({
-        totalNeeded: numRows,
-        currentlySelected: currentPageSelections,
-        startPage: page,
+    requestAnimationFrame(() => {
+      setAllSelections((prev) => {
+        const updatedMap = { ...prev };
+        currentPageSelections.forEach((item) => (updatedMap[item.id] = item));
+        return updatedMap;
       });
-      setTimeout(() => setPage((prev) => prev + 1), 50);
-    } else {
-      setPendingSelection(null);
-    }
+
+      setSelectedProducts(currentPageSelections);
+
+      if (numRows > rowsFromCurrentPage) {
+        setPendingSelection({
+          totalNeeded: numRows,
+          currentlySelected: currentPageSelections,
+          startPage: page,
+        });
+        setPage((prev) => prev + 1);
+      } else {
+        setPendingSelection(null);
+      }
+    });
   };
 
-  // Pagination change handler
   const onPageChange = (event: DataTablePageEvent) => {
     if (event.page !== undefined && !pendingSelection) {
       setPage(event.page + 1);
     }
   };
 
-  // Row selection change persistence
   const handleSelectionChange = (
     e: DataTableSelectionMultipleChangeEvent<Artwork[]>
   ) => {
     if (pendingSelection) return;
 
     const newSelection = e.value;
-    const updatedMap = { ...allSelections };
 
-    // Add selected
-    newSelection.forEach((item) => (updatedMap[item.id] = item));
-
-    // Remove unselected
-    products.forEach((item) => {
-      if (!newSelection.find((sel) => sel.id === item.id)) {
-        delete updatedMap[item.id];
-      }
+    // Update the allSelections map
+    setAllSelections((prev) => {
+      const updatedMap = { ...prev };
+     
+      newSelection.forEach((item) => (updatedMap[item.id] = item));
+      
+      products.forEach((item) => {
+        if (!newSelection.find((sel) => sel.id === item.id)) {
+          delete updatedMap[item.id];
+        }
+      });
+      return updatedMap;
     });
 
-    setAllSelections(updatedMap);
     setSelectedProducts(newSelection);
   };
 
   return (
     <div className='card'>
       <h1 className='text-center'>Artwork Data table</h1>
-
       {loading ? (
         <div className='card flex justify-content-center items-center'>
           <ProgressSpinner />
         </div>
       ) : (
         <div className=''>
-          {/* <OverlayPanelButton onSubmit={handleRowSelection} /> */}
-
           <DataTable
             value={products}
             dataKey='id'
