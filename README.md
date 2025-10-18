@@ -19,7 +19,7 @@ https://artworks-data-table-manager.netlify.app/
 - React
 - TypeScript
 - PrimeReact (DataTable, OverlayPanel, InputText, Button)
-- Art Institute of Chicago API
+- Art Institute  API
 
 ## Installation
 
@@ -36,10 +36,10 @@ cd artworks-data-table-manager
 npm install
 ```
 
-3. Install PrimeReact and PrimeIcons
+3. Install PrimeReact, PrimeIcons , and  PrimeFlex
 
 ```bash
-npm install primereact primeicons
+npm install primereact primeicons primeflex
 ```
 
 4. Start the development server
