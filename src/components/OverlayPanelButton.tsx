@@ -9,14 +9,14 @@ interface OverlayPanelButtonProps {
 
 const OverlayPanelButton = ({ onSubmit }: OverlayPanelButtonProps) => {
   const [inputValue, setInputValue] = useState("");
-  const op = useRef(null);
+  const op = useRef<OverlayPanel>(null);
 
   const handleSubmit = (e: React.MouseEvent) => {
     const numValue = parseInt(inputValue);
     if (!isNaN(numValue) && numValue > 0) {
       onSubmit(numValue);
     }
-    op.current.toggle(e);
+    op.current?.toggle(e);
   };
 
   return (
@@ -24,11 +24,10 @@ const OverlayPanelButton = ({ onSubmit }: OverlayPanelButtonProps) => {
       <Button
         type='button'
         icon='pi pi-chevron-down'
-        onClick={(e) => op.current.toggle(e)}
+        onClick={(e) => op.current?.toggle(e)}
         text
         plain
         severity='contrast'
-       
         style={{ color: "#71797E" }}
       />
 

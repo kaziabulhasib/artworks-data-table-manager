@@ -208,8 +208,8 @@ const Table = () => {
             tableStyle={{ minWidth: "55rem" }}>
             <Column
               selectionMode='multiple'
-              headerStyle={{ width: "3rem",  }}
-              headerClassName='selection-header' 
+              headerStyle={{ width: "3rem" }}
+              headerClassName='selection-header'
               header={
                 <div style={{ width: "100%", height: "100%" }}>
                   <div className='overlay-btn-container'>
